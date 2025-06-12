@@ -1,30 +1,30 @@
 {
   "sales": [
     { "name": "Jan", "sales": 4200 },
-    { "name": "Feb", "sales": 3800 },
+    { "name": "Fev", "sales": 3800 },
     { "name": "Mar", "sales": 5100 },
-    { "name": "Apr", "sales": 4600 },
-    { "name": "May", "sales": 5400 },
+    { "name": "Abr", "sales": 4600 },
+    { "name": "Mai", "sales": 5400 },
     { "name": "Jun", "sales": 7200 },
     { "name": "Jul", "sales": 6100 },
-    { "name": "Aug", "sales": 2900 },
-    { "name": "Sep", "sales": 6800 },
-    { "name": "Oct", "sales": 6300 },
+    { "name": "Ago", "sales": 2900 },
+    { "name": "Set", "sales": 6800 },
+    { "name": "Out", "sales": 6300 },
     { "name": "Nov", "sales": 7100 },
-    { "name": "Dec", "sales": 7500 }
+    { "name": "Dez", "sales": 7500 }
   ],
   "categories": [
-    { "name": "Smartphones", "value": 5200 },
+    { "name": "Telefones", "value": 5200 },
     { "name": "Laptops", "value": 4300 },
-    { "name": "Furniture", "value": 3100 },
-    { "name": "Beauty & Personal Care", "value": 2700 },
-    { "name": "Gaming Accessories", "value": 2200 }
+    { "name": "Mobília", "value": 3100 },
+    { "name": "Beleza e cuidados pessoais", "value": 2700 },
+    { "name": "Acessórios para jogos", "value": 2200 }
   ],
   "orderStatus": [
-    { "name": "Pending", "value": 60 },
-    { "name": "Processing", "value": 45 },
-    { "name": "Canceled", "value": 30 },
-    { "name": "Delivered", "value": 120 }
+    { "name": "Pendente", "value": 60 },
+    { "name": "Processando", "value": 45 },
+    { "name": "Cancelado", "value": 30 },
+    { "name": "Entregue", "value": 120 }
   ],
   "productPerformance": [
     {
@@ -35,14 +35,14 @@
     },
     { "name": "Laptop", "Retention": 4300, "Revenue": 2700, "Profit": 3400 },
     {
-      "name": "Coffee Table",
+      "name": "Mesa de café",
       "Retention": 3100,
       "Revenue": 6900,
       "Profit": 4100
     },
     { "name": "Mouse", "Retention": 2500, "Revenue": 4200, "Profit": 2700 },
     {
-      "name": "Running Shoes",
+      "name": "Tênis",
       "Retention": 2000,
       "Revenue": 9000,
       "Profit": 2900
@@ -96,10 +96,10 @@
     }
   ],
   "orderStats": [
-    { "name": "Total Orders", "value": "15,240", "icon": "ShoppingBag" },
-    { "name": "Completed Orders", "value": "13,500", "icon": "CheckCircle" },
-    { "name": "Pending Orders", "value": "1,120", "icon": "Clock" },
-    { "name": "Canceled Orders", "value": "620", "icon": "Ban" }
+    { "name": "Todos pPedidos", "value": "15,240", "icon": "ShoppingBag" },
+    { "name": "Pedidos Completos", "value": "13,500", "icon": "CheckCircle" },
+    { "name": "Pedidos Pendentes", "value": "1,120", "icon": "Clock" },
+    { "name": "Pedidos Cancelados", "value": "620", "icon": "Ban" }
   ],
   "products": [
     {
@@ -149,11 +149,11 @@
     }
   ],
   "salesByCategory": [
-    { "name": "Electronics", "value": 400 },
-    { "name": "Clothing", "value": 300 },
-    { "name": "Home & Garden", "value": 200 },
-    { "name": "Books", "value": 100 },
-    { "name": "Others", "value": 150 }
+    { "name": "Eletrônico", "value": 400 },
+    { "name": "Roupas", "value": 300 },
+    { "name": "Casa e jardim", "value": 200 },
+    { "name": "Livros", "value": 100 },
+    { "name": "Outros", "value": 150 }
   ],
   "clients": [
     {
@@ -199,13 +199,13 @@
   ],
   "sidebarItems": [
     { "name": "Dashboard", "icon": "House", "href": "/" },
-    { "name": "Products", "icon": "ShoppingBag", "href": "/products" },
-    { "name": "Clients", "icon": "Users", "href": "/users" },
-    { "name": "Sales", "icon": "DollarSign", "href": "/sales" },
-    { "name": "Orders", "icon": "ShoppingCart", "href": "/orders" },
-    { "name": "Settings", "icon": "Settings", "href": "" },
-    { "name": "Messages", "icon": "Mail", "href": "" },
-    { "name": "Notifications", "icon": "Bell", "href": "" },
+    { "name": "Produtos", "icon": "ShoppingBag", "href": "/products" },
+    { "name": "Clientes", "icon": "Users", "href": "/users" },
+    { "name": "Vendas", "icon": "DollarSign", "href": "/sales" },
+    { "name": "Pedidos", "icon": "ShoppingCart", "href": "/orders" },
+    { "name": "Configurações", "icon": "Settings", "href": "" },
+    { "name": "Mensagens", "icon": "Mail", "href": "" },
+    { "name": "Notificações", "icon": "Bell", "href": "" },
     { "name": "Help", "icon": "Info", "href": "" }
   ]
 }
