@@ -1,10 +1,10 @@
 "use client"
 
-import Statcard from '@/components/Statcard'
+import Statcard from '../../components/Statcard'
 import { DollarSign, ShoppingBag, SquareActivity, User, Users } from 'lucide-react'
 import React from 'react'
 import { motion } from "framer-motion"
-import SalesOverviewChart from '@/components/SalesOverviewChart'
+import SalesOverviewChart from '../../components/SalesOverviewChart'
 
 const OverviewPage = () => {
     return (
