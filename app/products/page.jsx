@@ -2,7 +2,9 @@
 
 import React from 'react'
 import { motion } from "framer-motion"
-import Statcard from '@/components/Statcard'
+import { ChartBarDecreasing, DollarSign, ShoppingBag, SquareActivity } from 'lucide-react'
+import Statcard from '../../components/Statcard'
+import ProductsTable from '../../components/ProductsTable'
 
 
 const Productspage = () => {
@@ -14,11 +16,13 @@ const Productspage = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 1 }}
                 >
-                    <Statcard />
-                    <Statcard />
-                    <Statcard />
-                    <Statcard />
+                    <Statcard name="Total Produtos" icon={ShoppingBag} value={"4,352"} />
+                    <Statcard name="Total Pedidos" icon={SquareActivity} value={"1,234"} />
+                    <Statcard name="Total Clientes" icon={DollarSign} value={"567"} />
+                    <Statcard name="Total Receita" icon={ChartBarDecreasing} value={"$12,345"} />
                 </motion.div>
+
+                <ProductsTable />
             </main>
         </div>
     )
