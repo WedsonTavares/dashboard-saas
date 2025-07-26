@@ -36,6 +36,13 @@ const ProductsTable = () => {
             )
         );
     }
+    const handleDelete = (id) => {
+        const confirmDelete = window.confirm("Tem certeza que deseja excluir este produto?");
+
+        if (confirmDelete) {
+            setProducts(prevProducts => prevProducts.filter(product => product.id !== id));
+        }
+    }
 
     return (
         <motion.div className='bg-[#1e1e1e] backdrop-blur-md shadow-lg rounded-xl p-4 md:p-6
@@ -115,7 +122,9 @@ const ProductsTable = () => {
                                                     (<Save size={14} />) :
                                                     (<Edit size={14} />)}
                                             </button>
-                                            <button className='text-red-500 hover:text-red-300 cursor-pointer' onClick={() => handleDelete(product.id)}>
+                                            <button className='text-red-500 hover:text-red-300 cursor-pointer'
+                                                onClick={() =>
+                                                    handleDelete(product.id)}>
                                                 <Trash2 size={14} />
                                             </button>
                                         </div>
@@ -169,22 +178,22 @@ const ProductsTable = () => {
                                     {product.category}
                                 </td>
                                 {["Preço", "Estoque", "Vendas"].map((field) => (
-    <td
-        key={field}
-        className={`hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-300 ${editingRow === product.id ? "border border-gray-400" : ""}`}
-    >
-        {editingRow === product.id ? (
-            <input
-                type="text"
-                className='bg-transparent text-white border-none outline-none w-16 text-center'
-                value={field === "Preço" ? product.price !== undefined ? product.price : "" : field === "Estoque" ? product.stock !== undefined ? product.stock : "" : field === "Vendas" ? product.sales !== undefined ? product.sales : "" : ""}
-                onChange={(e) =>
-                    handleChange(product.id, field === "Preço" ? "price" : field === "Estoque" ? "stock" : field === "Vendas" ? "sales" : field, e.target.value)}
-            />
-        ) : (
-            field === "Preço" ? `$${product.price.toFixed(2)}` : field === "Estoque" ? product.stock : field === "Vendas" ? product.sales : null
-        )}
-    </td>
+                                    <td
+                                        key={field}
+                                        className={`hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-300 ${editingRow === product.id ? "border border-gray-400" : ""}`}
+                                    >
+                                        {editingRow === product.id ? (
+                                            <input
+                                                type="text"
+                                                className='bg-transparent text-white border-none outline-none w-16 text-center'
+                                                value={field === "Preço" ? product.price !== undefined ? product.price : "" : field === "Estoque" ? product.stock !== undefined ? product.stock : "" : field === "Vendas" ? product.sales !== undefined ? product.sales : "" : ""}
+                                                onChange={(e) =>
+                                                    handleChange(product.id, field === "Preço" ? "price" : field === "Estoque" ? "stock" : field === "Vendas" ? "sales" : field, e.target.value)}
+                                            />
+                                        ) : (
+                                            field === "Preço" ? `$${product.price.toFixed(2)}` : field === "Estoque" ? product.stock : field === "Vendas" ? product.sales : null
+                                        )}
+                                    </td>
                                 ))}
 
                                 <td className='hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-300'
@@ -197,10 +206,10 @@ const ProductsTable = () => {
                                                 handleEditClick(product.id)}
                                         >
                                             {editingRow === product.id ?
-                                                ( <Save size={18} />) :
-                                                ( <Edit size={18} />)}
+                                                (<Save size={18} />) :
+                                                (<Edit size={18} />)}
                                         </button>
-                                        <button className='text-red-500 hover:text-red-300 cursor-pointer'>
+                                        <button className='text-red-500 hover:text-red-300 cursor-pointer' onClick={() => handleDelete(product.id)}>
                                             <Trash2 size={18} />
                                         </button>
                                     </div>
