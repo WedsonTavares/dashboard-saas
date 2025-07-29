@@ -96,7 +96,7 @@
     }
   ],
   "orderStats": [
-    { "name": "Todos pPedidos", "value": "15,240", "icon": "ShoppingBag" },
+    { "name": "Todos Pedidos", "value": "15,240", "icon": "ShoppingBag" },
     { "name": "Pedidos Completos", "value": "13,500", "icon": "CheckCircle" },
     { "name": "Pedidos Pendentes", "value": "1,120", "icon": "Clock" },
     { "name": "Pedidos Cancelados", "value": "620", "icon": "Ban" }

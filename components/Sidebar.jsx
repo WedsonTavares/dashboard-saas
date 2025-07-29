@@ -23,13 +23,13 @@ const ICONS = {
   DollarSign,
   Settings,
   ShoppingBag,
-  ShoppingCart,    // 🔥 adicione esse
+  ShoppingCart,    
   Users,
   Bell,
   Info,
   Mail,
-  MessageSquare,   // 🔥 adicione esse se usar “messageSquare”
-  HelpCircle,      // 🔥 adicione esse se usar “helpCircle”
+  MessageSquare,
+  HelpCircle,
 };
 
 export default function Sidebar() {
@@ -60,7 +60,7 @@ export default function Sidebar() {
           {items.map((item) => {
             const key = item.icon.charAt(0).toUpperCase() + item.icon.slice(1);
             const Icon = ICONS[key];
-            if (!Icon) return null; // pula se não existir
+            if (!Icon) return null; 
 
             return (
               <Link key={item.name} href={item.href}>

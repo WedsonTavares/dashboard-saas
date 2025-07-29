@@ -1,6 +1,6 @@
 "use client"
 
-import Statcard from '../../components/Statcard'
+import Statcard from '../../components/StatCard'
 import { DollarSign, ShoppingBag, SquareActivity, User, Users } from 'lucide-react'
 import React from 'react'
 import { motion } from "framer-motion"

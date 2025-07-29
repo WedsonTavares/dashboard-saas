@@ -3,7 +3,7 @@
 import React from 'react'
 import { motion } from "framer-motion"
 import { ChartBarDecreasing, DollarSign, ShoppingBag, SquareActivity } from 'lucide-react'
-import Statcard from '../../components/Statcard'
+import Statcard from '../../components/StatCard'
 import ProductsTable from '../../components/ProductsTable'
 
 
