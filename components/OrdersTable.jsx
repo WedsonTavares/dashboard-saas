@@ -1,11 +1,26 @@
 "use client";
 
-import React from 'react'
+import React, { useState } from 'react'
 import { motion } from "framer-motion";
 import ordersData from '../public/data/data.json';
-import { Search } from 'lucide-react';
+import { Edit, Search, Trash2 } from 'lucide-react';
 
 const OrdersTable = () => {
+
+    const [searchTerm, setSearchTerm] = useState("");
+    const [filteredOrders, setFilteredOrders] = useState(ordersData.orders);
+
+    const handleSearch = (event) => {
+        const term = event.target.value.toLowerCase();
+        setSearchTerm(term);
+        const filtered = ordersData.orders.filter((order) =>
+            order.id.toLowerCase().includes(term) ||
+            order.client.toLowerCase().includes(term) ||
+            order.email.toString().includes(term) 
+        );
+        setFilteredOrders(filtered);
+    };
+
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -21,6 +36,8 @@ const OrdersTable = () => {
                     <input
                         type="text"
                         placeholder='Pesquisar pedidos...'
+                        value={searchTerm}
+                        onChange={handleSearch}
                         className='bg-[#2f2f2f] text-white placeholder:text-gray-400 rounded-lg pl-10 py-2 pr-4 w-full md:w-64
                     focus:outline-none focus:ring-2 focus:ring-gray-500 transition duration-200 text-sm'
                     />
@@ -49,15 +66,93 @@ const OrdersTable = () => {
                         </tr>
                     </thead>
                     <tbody className='divide-y divide-gray-700'>
-                        {ordersData.orders.map((order) => (
-                            <motion.tr 
-                            key={order.id}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.1, duration: 0.3 }}
-                            className='flex flex-col md:table-row mb-4 md:mb-0 border-b md:border-b-0 border-gray-700 md:border-none p-2 md:p-0'
+                        {filteredOrders.map((order) => (
+                            <motion.tr
+                                key={order.id}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.1, duration: 0.3 }}
+                                className='flex flex-col md:table-row mb-4 md:mb-0 border-b md:border-b-0 border-gray-700 md:border-none p-2 md:p-0'
                             >
+                                {/* mobile */}
 
+                                <td className='md:hidden px-3 py-2'>
+                                    <div className='flex items-center justify-between'>
+                                        <div className='flex flex-col'>
+                                            <div className='text-sm font-medium text-gray-100'>{order.id}</div>
+                                            <div className='text-xs text-gray-100'>{order.client}</div>
+                                            <div className='text-xs text-gray-400'>{order.email}</div>
+                                        </div>
+                                        <div className='flex space-x-1 -mt-1 -mr-1'>
+                                            <button className='text-indigo-500 hover:text-indigo-300 cursor-pointer'>
+                                                <Edit
+                                                    size={16}
+                                                />
+                                            </button>
+                                            <button className='text-red-500 hover:text-red-300 cursor-pointer'>
+                                                <Trash2
+                                                    size={16} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div className='mt-2 text-xs text-gray-300'>
+                                        <div>Total: {order.total.toFixed(2)}</div>
+                                        <div className='flex items-center gap-1'>
+                                            Status:
+                                            <span className={`px-2 inline-flex font-semibold rounded-full 
+                                                ${order.status === 'Entregue' ? 'bg-green-400 text-green-800' :
+                                                    order.status === 'Pendente' ? 'bg-yellow-400 text-yellow-800' :
+                                                        'bg-red-500 text-red-100'}`}>
+                                                {order.status}
+                                            </span>
+                                        </div>
+                                        <div className=''>Data: {order.date}</div>
+                                        <div>Cidade: {order.country}</div>
+                                    </div>
+                                </td>
+                                {/* desktop */}
+                                <td className='hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100'>
+                                    {order.id}
+                                </td>
+                                <td className='hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100'>
+                                    {order.client}
+                                </td>
+                                <td className='hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100'>
+                                    $ {order.total.toFixed(2)}
+                                </td>
+
+                                <td className='hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100'>
+                                    <span className={`px-2 inline-flex font-semibold rounded-full 
+                                                ${order.status === 'Entregue' ? 'bg-green-400 text-green-800' :
+                                            order.status === 'Pendente' ? 'bg-yellow-400 text-yellow-800' :
+                                                'bg-red-500 text-red-100'}`}>
+                                        {order.status}
+                                    </span>
+                                </td>
+
+                                <td className='hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-300'>
+                                    {(() => {
+                                        // Tenta converter datas tipo 'Jan 30, 2025' para '30/01/2025'
+                                        const date = new Date(order.date);
+                                        if (!isNaN(date)) {
+                                            return date.toLocaleDateString('pt-BR');
+                                        }
+                                        // Se não for possível converter, mostra o valor original
+                                        return order.date;
+                                    })()}
+                                </td>
+                                <td className='hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-300'>
+                                    {order.country}
+                                </td>
+                                <td className='hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-300'>
+                                    <div className='flex scroll-px-1 -ml-2'></div>
+                                    <button className='text-indigo-500 hover:text-indigo-300 mr-2 cursor-pointer'>
+                                        <Edit size={16} />
+                                    </button>
+                                    <button className='text-red-500 hover:text-red-300 cursor-pointer'>
+                                        <Trash2 size={16} />
+                                    </button>
+                                </td>
                             </motion.tr>
                         ))}
                     </tbody>

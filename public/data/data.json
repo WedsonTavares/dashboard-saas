@@ -54,7 +54,7 @@
       "client": "Ethan Carter",
       "email": "Ethan.Carter@example.com",
       "total": 174.5,
-      "status": "Delivered",
+      "status": "Entregue",
       "date": "Jan 30, 2025",
       "country": "United States"
     },
@@ -63,7 +63,7 @@
       "client": "Sophia Mitchell",
       "email": "Sophia.Mitchell@example.co.uk",
       "total": 632.0,
-      "status": "Pending",
+      "status": "Pendente",
       "date": "Feb 23, 2025",
       "country": "United Kingdom"
     },
@@ -72,7 +72,7 @@
       "client": "Liam Harrison",
       "email": "Liam.Harrison@example.de",
       "total": 202.5,
-      "status": "Delivered",
+      "status": "Entregue",
       "date": "Dec 25, 2024",
       "country": "Germany"
     },
@@ -81,7 +81,7 @@
       "client": "Ava Bennett",
       "email": "Ava.Bennett@example.in",
       "total": 330.0,
-      "status": "Canceled",
+      "status": "Cancelado",
       "date": "Mar 22, 2025",
       "country": "India"
     },
@@ -90,7 +90,7 @@
       "client": "Noah Reynolds",
       "email": "Noah.Reynolds@example.au",
       "total": 595.5,
-      "status": "Delivered",
+      "status": "Entregue",
       "date": "Mar 5, 2025",
       "country": "Australia"
     }
