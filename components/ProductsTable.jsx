@@ -1,16 +1,35 @@
 "use client"
 
-import React, { useMemo, useState } from 'react'
-import productData from '../public/data/data.json'
+import React, { useMemo, useState, useEffect } from 'react'
+import { getProducts, updateProduct, deleteProduct } from '../lib/supabase-queries'
 import { motion } from "framer-motion"
-import { Edit, Save, Search, Trash2 } from 'lucide-react'
+import { Edit, Save, Search, Trash2, RefreshCw } from 'lucide-react'
 import Image from 'next/image'
 
 const ProductsTable = () => {
 
-    const [products, setProducts] = useState(productData.products)
+    const [products, setProducts] = useState([])
+    const [loading, setLoading] = useState(true)
     const [searchTerm, setSearchTerm] = useState("")
     const [editingRow, setEditingRow] = useState(null)
+    const [saving, setSaving] = useState(false)
+
+    // Carregar produtos do Supabase
+    useEffect(() => {
+        loadProducts()
+    }, [])
+
+    const loadProducts = async () => {
+        setLoading(true)
+        try {
+            const data = await getProducts()
+            setProducts(data || [])
+        } catch (error) {
+            console.error('Erro ao carregar produtos:', error)
+        } finally {
+            setLoading(false)
+        }
+    }
 
     const filteredProducts = useMemo(() => {
         return products.filter(product =>
@@ -23,8 +42,26 @@ const ProductsTable = () => {
         setEditingRow(id);
     }
 
-    const handleSaveClick = (id) => {
-        setEditingRow(null);
+    const handleSaveClick = async (id) => {
+        setSaving(true)
+        try {
+            const productToUpdate = products.find(p => p.id === id)
+            const updatedProduct = await updateProduct(id, {
+                price: productToUpdate.price,
+                stock: productToUpdate.stock,
+                sales: productToUpdate.sales
+            })
+            
+            if (updatedProduct) {
+                console.log('Produto atualizado com sucesso!')
+                setEditingRow(null)
+            }
+        } catch (error) {
+            console.error('Erro ao salvar produto:', error)
+            alert('Erro ao salvar produto. Tente novamente.')
+        } finally {
+            setSaving(false)
+        }
     }
 
     const handleChange = (id, field, value) => {
@@ -36,11 +73,25 @@ const ProductsTable = () => {
             )
         );
     }
-    const handleDelete = (id) => {
-        const confirmDelete = window.confirm("Tem certeza que deseja excluir este produto?");
+    const handleDelete = async (id) => {
+        const product = products.find(p => p.id === id)
+        const confirmDelete = window.confirm(`Tem certeza que deseja excluir o produto "${product?.name}"?`)
 
         if (confirmDelete) {
-            setProducts(prevProducts => prevProducts.filter(product => product.id !== id));
+            setSaving(true)
+            try {
+                const deletedProduct = await deleteProduct(id)
+                if (deletedProduct) {
+                    // Remove do estado local
+                    setProducts(prevProducts => prevProducts.filter(product => product.id !== id))
+                    console.log('Produto excluído com sucesso!')
+                }
+            } catch (error) {
+                console.error('Erro ao excluir produto:', error)
+                alert('Erro ao excluir produto. Tente novamente.')
+            } finally {
+                setSaving(false)
+            }
         }
     }
 
@@ -53,9 +104,20 @@ const ProductsTable = () => {
 
             <div className='flex flex-col md:flex-row justify-between items-center mb-6 gap-4
          md:gap-0'>
-                <h2 className='text-lg md:text-xl font-semibold text-gray-100 text-center md:text-left'>
-                    Lista de Produtos
-                </h2>
+                <div className='flex items-center gap-3'>
+                    <h2 className='text-lg md:text-xl font-semibold text-gray-100 text-center md:text-left'>
+                        Lista de Produtos
+                    </h2>
+                    <button
+                        onClick={loadProducts}
+                        disabled={loading}
+                        className='p-2 text-gray-400 hover:text-gray-200 transition-colors
+                                 disabled:opacity-50 disabled:cursor-not-allowed'
+                        title='Atualizar dados'
+                    >
+                        <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
+                    </button>
+                </div>
                 <div className='relative w-full md:w-auto'>
                     <input
                         onChange={(e) => setSearchTerm(e.target.value)}
@@ -69,6 +131,12 @@ const ProductsTable = () => {
                 </div>
             </div>
             <div className='overflow-x-auto'>
+                {loading ? (
+                    <div className='text-center py-8'>
+                        <RefreshCw className='animate-spin mx-auto text-gray-400 mb-2' size={24} />
+                        <p className='text-gray-400'>Carregando produtos...</p>
+                    </div>
+                ) : (
                 <table className='min-w-full divide-y divide-gray-700'>
                     <thead>
                         <tr>
@@ -115,16 +183,18 @@ const ProductsTable = () => {
                                         <div className='flex space-x-1 -mt-1 -mr-1'>
                                             <button className='text-indigo-500 hover:text-indigo-300 cursor-pointer'
                                                 onClick={() => editingRow === product.id ?
-                                                    handleSaveClick() :
+                                                    handleSaveClick(product.id) :
                                                     handleEditClick(product.id)}
+                                                disabled={saving}
                                             >
                                                 {editingRow === product.id ?
-                                                    (<Save size={14} />) :
+                                                    (saving ? <RefreshCw size={14} className="animate-spin" /> : <Save size={14} />) :
                                                     (<Edit size={14} />)}
                                             </button>
                                             <button className='text-red-500 hover:text-red-300 cursor-pointer'
-                                                onClick={() =>
-                                                    handleDelete(product.id)}>
+                                                onClick={() => handleDelete(product.id)}
+                                                disabled={saving}
+                                            >
                                                 <Trash2 size={14} />
                                             </button>
                                         </div>
@@ -202,14 +272,19 @@ const ProductsTable = () => {
                                         <button
                                             className='text-indigo-500 hover:text-indigo-300 cursor-pointer'
                                             onClick={() => editingRow === product.id ?
-                                                handleSaveClick() :
+                                                handleSaveClick(product.id) :
                                                 handleEditClick(product.id)}
+                                            disabled={saving}
                                         >
                                             {editingRow === product.id ?
-                                                (<Save size={18} />) :
+                                                (saving ? <RefreshCw size={18} className="animate-spin" /> : <Save size={18} />) :
                                                 (<Edit size={18} />)}
                                         </button>
-                                        <button className='text-red-500 hover:text-red-300 cursor-pointer' onClick={() => handleDelete(product.id)}>
+                                        <button 
+                                            className='text-red-500 hover:text-red-300 cursor-pointer' 
+                                            onClick={() => handleDelete(product.id)}
+                                            disabled={saving}
+                                        >
                                             <Trash2 size={18} />
                                         </button>
                                     </div>
@@ -218,6 +293,7 @@ const ProductsTable = () => {
                         ))}
                     </tbody>
                 </table>
+                )}
             </div>
         </motion.div>
     )

@@ -203,9 +203,9 @@
     { "name": "Clientes", "icon": "Users", "href": "/users" },
     { "name": "Vendas", "icon": "DollarSign", "href": "/sales" },
     { "name": "Pedidos", "icon": "ShoppingCart", "href": "/orders" },
-    { "name": "Configurações", "icon": "Settings", "href": "" },
-    { "name": "Mensagens", "icon": "Mail", "href": "" },
-    { "name": "Notificações", "icon": "Bell", "href": "" },
-    { "name": "Help", "icon": "Info", "href": "" }
+    { "name": "Configurações", "icon": "Settings", "href": "/configuracoes" },
+    { "name": "Mensagens", "icon": "Mail", "href": "/mensagens" },
+    { "name": "Notificações", "icon": "Bell", "href": "/notificacoes" },
+    { "name": "Help", "icon": "Info", "href": "/help" }
   ]
 }

@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 
 const ICONS = {
   House,
@@ -32,17 +32,21 @@ const ICONS = {
   HelpCircle,
 };
 
+const SIDEBAR_ITEMS = [
+  { name: "Dashboard", icon: "house", href: "/" },
+  { name: "Overview", icon: "dollarSign", href: "/overview" },
+  { name: "Produtos", icon: "shoppingBag", href: "/products" },
+  { name: "Pedidos", icon: "shoppingCart", href: "/orders" },
+  { name: "Clientes", icon: "users", href: "/users" },
+  { name: "Configurações", icon: "settings", href: "/configuracoes" },
+  { name: "Mensagens", icon: "messageSquare", href: "/mensagens" },
+  { name: "Notificações", icon: "bell", href: "/notificacoes" },
+  { name: "Ajuda", icon: "helpCircle", href: "/help" }
+];
+
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(true);
-  const [items, setItems] = useState([]);
   const pathname = usePathname();
-
-  useEffect(() => {
-    fetch("/data/data.json")
-      .then((res) => res.json())
-      .then((data) => setItems(data.sidebarItems))
-      .catch(console.error);
-  }, []);
 
   return (
     <aside className={`relative z-10 transition-all duration-300 ease-in-out flex-shrink-0 ${
@@ -57,7 +61,7 @@ export default function Sidebar() {
         </button>
 
         <nav className="mt-8 flex-grow">
-          {items.map((item) => {
+          {SIDEBAR_ITEMS.map((item) => {
             const key = item.icon.charAt(0).toUpperCase() + item.icon.slice(1);
             const Icon = ICONS[key];
             if (!Icon) return null; 
