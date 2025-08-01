@@ -1,12 +1,21 @@
+'use client'
+
 import Image from 'next/image'
-import React from 'react'
+import React, { useState } from 'react'
 import uk from '../public/images/uk.png'
-import { Bell } from 'lucide-react'
+import { Bell, ChevronDown, LogOut, User } from 'lucide-react'
 import admin from '../public/images/admin.jpg'
-
-
+import { useAuth } from '../contexts/AuthContext'
 
 const Header = () => {
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+    const { user, signOut } = useAuth()
+
+    const handleSignOut = async () => {
+        await signOut()
+        setIsDropdownOpen(false)
+    }
+
     return (
         <header className='bg-[#1e1e1e] shadow-lg border-b border-[#1f1f1f] mx-4 sm:mx-6 lg:mx-8 mt-4 mb-2 rounded-lg'>
             <div className='max-w-7xl mx-auto py-4 px-4 sm:px-6 flex items-center justify-between'>
@@ -24,14 +33,52 @@ const Header = () => {
                     <div className='relative'>
                         <Bell className='w-5 sm:w-6 h-5 sm:h-6 text-gray-300 cursor-pointer hover:text-white' />
                     </div>
-                    <div className='flex items-center space-x-2 sm:space-x-3'>
-                        <Image
-                            src={admin}
-                            alt='admin'
-                            width={35}
-                            height={35}
-                            className='rounded-full boder border-gray-600' />
-                        <span className='hidden sm:block text-gray-100 font-medium'>Wedson Tavares</span>
+                    
+                    {/* User Menu Dropdown */}
+                    <div className='relative'>
+                        <button
+                            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                            className='flex items-center space-x-2 sm:space-x-3 hover:bg-[#2f2f2f] rounded-lg p-2 transition-colors'
+                        >
+                            <Image
+                                src={admin}
+                                alt='admin'
+                                width={35}
+                                height={35}
+                                className='rounded-full border border-gray-600' 
+                            />
+                            <div className='hidden sm:block'>
+                                <span className='text-gray-100 font-medium'>
+                                    {user?.email?.split('@')[0] || 'Usuário'}
+                                </span>
+                            </div>
+                            <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                        </button>
+
+                        {/* Dropdown Menu */}
+                        {isDropdownOpen && (
+                            <div className='absolute right-0 mt-2 w-48 bg-[#2f2f2f] rounded-lg shadow-lg border border-[#404040] py-2 z-50'>
+                                <div className='px-4 py-2 border-b border-[#404040]'>
+                                    <p className='text-sm text-gray-400'>Logado como:</p>
+                                    <p className='text-sm text-white font-medium truncate'>
+                                        {user?.email}
+                                    </p>
+                                </div>
+                                
+                                <button className='w-full px-4 py-2 text-left text-gray-300 hover:bg-[#404040] hover:text-white transition-colors flex items-center space-x-2'>
+                                    <User className='w-4 h-4' />
+                                    <span>Perfil</span>
+                                </button>
+                                
+                                <button 
+                                    onClick={handleSignOut}
+                                    className='w-full px-4 py-2 text-left text-gray-300 hover:bg-[#404040] hover:text-white transition-colors flex items-center space-x-2'
+                                >
+                                    <LogOut className='w-4 h-4' />
+                                    <span>Sair</span>
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
