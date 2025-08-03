@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { motion } from "framer-motion";
-import { getClients, updateClient, deleteClient } from '../lib/supabase-queries'
+import { getClients } from '../../lib/supabase-queries'
 import { Edit, Search, Trash2, RefreshCw, Save } from 'lucide-react';
 import Image from 'next/image';
 

@@ -4,8 +4,8 @@ import React from 'react'
 import { motion } from "framer-motion";
 import {Ban, CheckCircle, Clock, ShoppingBag } from 'lucide-react';
 import ordersData from '../../public/data/data.json';
-import Statcard from '../../components/StatCard';
-import OrdersTable from '../../components/OrdersTable';
+import { StatCard } from '../../components/ui';
+import { OrdersTable } from '../../components/tables';
 
 
 const iconMap = {
@@ -28,7 +28,7 @@ const OrdersPage = () => {
                     {ordersData.orderStats.map(({ name, value, icon }) => {
                         const IconComponent = iconMap[icon];
                         return (
-                            <Statcard
+                            <StatCard
                                 key={name}
                                 name={name}
                                 icon={IconComponent}

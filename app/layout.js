@@ -1,10 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Header from "../components/Header";
-import  Sidebar  from "../components/Sidebar";
 import { AuthProvider } from "../contexts/AuthContext";
-import AuthWrapper from "../components/AuthWrapper";
-import SessionSecurityWrapper from "../components/SessionSecurityWrapper";
+import ConditionalLayout from "../components/layout/ConditionalLayout";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,21 +25,9 @@ export default function RootLayout({ children }) {
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#121212] text-white`}
       >
         <AuthProvider>
-          <SessionSecurityWrapper>
-            <AuthWrapper>
-              {/* Full Page Layout */}
-              <div className="flex h-screen overflow-hidden">
-                <Sidebar />
-                {/* Main Content */}
-                <div className="flex flex-col flex-1 overflow-auto">
-                  <div className="max-w-7xl mx-auto w-full">
-                    <Header /> {/* Moves with content */}
-                    <main>{children}</main>
-                  </div>
-                </div>
-              </div>
-            </AuthWrapper>
-          </SessionSecurityWrapper>
+          <ConditionalLayout>
+            {children}
+          </ConditionalLayout>
         </AuthProvider>
       </body>
     </html>

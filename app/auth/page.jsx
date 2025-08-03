@@ -22,18 +22,26 @@ const AuthPage = () => {
     password: '',
     confirmPassword: ''
   })
-  const [error, setError] = useState('')
+  const [error, setError] = useState(null)
+  const [successMessage, setSuccessMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [cameFromLoginError, setCameFromLoginError] = useState(false)
 
-  const { user, signIn, signUp } = useAuth()
+  const { user, signIn, signUp, loading, initialized } = useAuth()
   const router = useRouter()
 
-  // Redirecionar se já estiver logado
+  // Redirecionar se já estiver logado (só após inicialização)
   useEffect(() => {
-    if (user) {
-      router.push('/')
+    if (initialized && user && !loading) {
+      console.log('[AUTH] User authenticated, redirecting to dashboard...')
+      // Pequeno delay para evitar conflitos de renderização
+      const timer = setTimeout(() => {
+        router.replace('/dashboard')
+      }, 250)
+      
+      return () => clearTimeout(timer)
     }
-  }, [user, router])
+  }, [user, router, loading, initialized])
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
@@ -41,22 +49,34 @@ const AuthPage = () => {
       ...prev,
       [name]: value
     }))
-    setError('') // Limpar erro ao digitar
+    if (error) setError(null) // Limpar erro ao digitar
   }
 
   const validateForm = () => {
     if (!formData.email || !formData.password) {
-      setError('Por favor, preencha todos os campos')
+      setError({
+        message: 'Por favor, preencha todos os campos',
+        type: 'VALIDATION_ERROR',
+        showCreateAccount: false
+      })
       return false
     }
 
     if (!isLogin && formData.password !== formData.confirmPassword) {
-      setError('As senhas não coincidem')
+      setError({
+        message: 'As senhas não coincidem',
+        type: 'VALIDATION_ERROR',
+        showCreateAccount: false
+      })
       return false
     }
 
     if (formData.password.length < 6) {
-      setError('A senha deve ter pelo menos 6 caracteres')
+      setError({
+        message: 'A senha deve ter pelo menos 6 caracteres',
+        type: 'VALIDATION_ERROR',
+        showCreateAccount: false
+      })
       return false
     }
 
@@ -66,10 +86,10 @@ const AuthPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     
-    if (!validateForm()) return
+    if (!validateForm() || isLoading) return
 
     setIsLoading(true)
-    setError('')
+    setError(null)
 
     try {
       if (isLogin) {
@@ -77,49 +97,113 @@ const AuthPage = () => {
         const { data, error } = await signIn(formData.email, formData.password)
         
         if (error) {
-          console.error('[UI] Login failed:', error)
-          setError(error.message || 'Erro ao fazer login. Tente novamente.')
+          console.error('[UI] Login failed:', error.type || 'UNKNOWN_ERROR', ':', error.message)
+          
+          // Detectar se pode ser conta não encontrada e sugerir criação
+          if (error.type === 'INVALID_CREDENTIALS' && error.suggestion === 'account_not_found') {
+            setError({
+              message: error.message,
+              type: error.type,
+              showCreateAccount: true
+            })
+          } else {
+            // Exibir mensagem de erro específica
+            setError({
+              message: error.message,
+              type: error.type,
+              showCreateAccount: false
+            })
+          }
+          
+          // Log adicional para debugging em produção
+          if (error.details) {
+            console.debug('[UI] Error details:', error.details)
+          }
+          
+          setIsLoading(false)
         } else if (data?.user) {
-          console.log('[UI] Login successful, redirecting...')
-          router.push('/')
+          console.log('[UI] Login successful, user authenticated')
+          setError(null) // Limpar qualquer erro anterior
+          // Não fazer redirecionamento manual aqui, deixar o useEffect cuidar
         }
       } else {
         console.log('[UI] Attempting registration for:', formData.email)
-        const { data, error, needsConfirmation } = await signUp(formData.email, formData.password)
+        const { data, error } = await signUp(formData.email, formData.password)
         
         if (error) {
-          console.error('[UI] Registration failed:', error)
-          setError(error.message || 'Erro ao criar conta. Tente novamente.')
-        } else {
-          console.log('[UI] Registration successful')
-          setError('')
+          console.error('[UI] Registration failed:', error.type || 'UNKNOWN_ERROR', ':', error.message)
           
-          if (needsConfirmation) {
-            alert('Conta criada! Verifique seu email para confirmar.')
-          } else {
-            alert('Conta criada com sucesso! Você já pode fazer login.')
+          // Exibir mensagem de erro específica
+          setError({
+            message: error.message,
+            type: error.type,
+            showCreateAccount: false
+          })
+          
+          // Log adicional para debugging em produção
+          if (error.details) {
+            console.debug('[UI] Error details:', error.details)
           }
           
-          // Mudar para modo login
-          setIsLogin(true)
-          setFormData({
-            email: formData.email,
-            password: '',
-            confirmPassword: ''
+          setIsLoading(false)
+        } else if (data?.user) {
+          console.log('[UI] Registration successful')
+          setError(null) // Limpar erros
+          
+          setSuccessMessage('Conta criada com sucesso! Agora faça login com suas credenciais.')
+          
+          // Mudar para modo login após um breve delay
+          setTimeout(() => {
+            setIsLogin(true)
+            setSuccessMessage('')
+            setCameFromLoginError(false)
+            setFormData({
+              email: formData.email,
+              password: '',
+              confirmPassword: ''
+            })
+          }, 2000)
+          
+          setIsLoading(false)
+        } else {
+          setError({
+            message: 'Erro inesperado ao criar conta. Tente novamente.',
+            type: 'UNEXPECTED_ERROR',
+            showCreateAccount: false
           })
+          setIsLoading(false)
         }
       }
     } catch (err) {
       console.error('[UI] Auth error:', err)
-      setError('Erro de conexão. Verifique sua internet e tente novamente.')
-    } finally {
+      
+      // Tratamento profissional de erros de conexão/sistema
+      let errorMessage = 'Erro inesperado do sistema. Tente novamente em alguns instantes.'
+      
+      if (err.name === 'TypeError' && err.message.includes('fetch')) {
+        errorMessage = 'Problema de conexão com o servidor. Verifique sua internet e tente novamente.'
+      } else if (err.name === 'AbortError') {
+        errorMessage = 'Operação cancelada. Tente novamente.'
+      } else if (err.message.includes('network')) {
+        errorMessage = 'Erro de rede. Verifique sua conexão e tente novamente.'
+      }
+      
+      setError({
+        message: errorMessage,
+        type: 'SYSTEM_ERROR',
+        showCreateAccount: false
+      })
+      
       setIsLoading(false)
     }
+    // Não resetar isLoading aqui para login, deixar o useEffect cuidar
   }
 
   const toggleMode = () => {
     setIsLogin(!isLogin)
-    setError('')
+    setError(null)
+    setSuccessMessage('')
+    setCameFromLoginError(false)
     setFormData({
       email: '',
       password: '',
@@ -144,20 +228,122 @@ const AuthPage = () => {
             <p className="text-gray-400 text-sm sm:text-base">
               {isLogin 
                 ? 'Acesse sua conta para continuar' 
-                : 'Crie sua conta para começar'
+                : cameFromLoginError
+                  ? 'Vamos criar sua conta com este email'
+                  : 'Crie sua conta para começar'
               }
             </p>
           </div>
 
+          {/* Info Message for users coming from login error */}
+          {!isLogin && cameFromLoginError && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="mb-6 p-4 bg-blue-900/20 border border-blue-500/30 rounded-lg"
+            >
+              <div className="flex items-start space-x-3">
+                <div className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5">
+                  ℹ️
+                </div>
+                <div className="flex-1">
+                  <h4 className="text-blue-300 font-medium text-sm mb-1">
+                    Criando Nova Conta
+                  </h4>
+                  <p className="text-blue-400 text-sm leading-relaxed">
+                    Parece que este email ainda não tem uma conta. Vamos criar uma agora!
+                  </p>
+                  <p className="text-blue-300/70 text-xs mt-2">
+                    💡 Depois de criar a conta, você poderá fazer login normalmente
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Success Message */}
+          {successMessage && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="mb-6 p-4 bg-green-900/20 border border-green-500/30 rounded-lg"
+            >
+              <div className="flex items-start space-x-3">
+                <div className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5">
+                  ✓
+                </div>
+                <div className="flex-1">
+                  <h4 className="text-green-300 font-medium text-sm mb-1">
+                    Sucesso!
+                  </h4>
+                  <p className="text-green-400 text-sm leading-relaxed">
+                    {successMessage}
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
           {/* Error Message */}
           {error && (
             <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="mb-6 p-3 bg-red-900/20 border border-red-500/30 rounded-lg flex items-center space-x-2"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="mb-6 p-4 bg-red-900/20 border border-red-500/30 rounded-lg"
             >
-              <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
-              <p className="text-red-400 text-sm">{error}</p>
+              <div className="flex items-start space-x-3">
+                <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <h4 className="text-red-300 font-medium text-sm mb-1">
+                    Erro de Autenticação
+                  </h4>
+                  <p className="text-red-400 text-sm leading-relaxed mb-3">
+                    {typeof error === 'string' ? error : error?.message || 'Erro desconhecido'}
+                  </p>
+                  
+                  {/* Sugestão de criar conta para credenciais inválidas */}
+                  {error?.showCreateAccount && isLogin && (
+                    <div className="bg-red-800/30 rounded-lg p-3 border border-red-600/30">
+                      <p className="text-red-300 text-sm mb-2">
+                        🔍 <strong>Conta não encontrada?</strong>
+                      </p>
+                      <p className="text-red-300/80 text-xs mb-3">
+                        Se você não tem uma conta ainda, pode criar uma agora mesmo.
+                      </p>
+                      <button
+                        onClick={() => {
+                          setIsLogin(false)
+                          setError(null)
+                          setCameFromLoginError(true)
+                          setFormData({
+                            email: formData.email, // Manter o email digitado
+                            password: '',
+                            confirmPassword: ''
+                          })
+                        }}
+                        className="bg-red-600 hover:bg-red-500 text-white text-xs px-3 py-1.5 rounded-md transition-colors"
+                      >
+                        Criar Nova Conta
+                      </button>
+                    </div>
+                  )}
+                  
+                  {/* Dicas contextuais para outros erros */}
+                  {!error?.showCreateAccount && typeof error === 'object' && error?.type === 'INVALID_CREDENTIALS' && (
+                    <p className="text-red-300/70 text-xs mt-2">
+                      💡 Dica: Verifique se o email e senha estão corretos
+                    </p>
+                  )}
+                  {typeof error === 'string' && error.includes('registrado') && (
+                    <p className="text-red-300/70 text-xs mt-2">
+                      💡 Dica: Tente fazer login ou use outro email
+                    </p>
+                  )}
+                </div>
+              </div>
             </motion.div>
           )}
 
@@ -262,14 +448,38 @@ const AuthPage = () => {
               </button>
             </p>
           </div>
+
+          {/* Botão de teste de erro - APENAS PARA DEBUG */}
+          <div className="mt-4 text-center">
+            <button
+              onClick={() => {
+                console.log('[DEBUG] Testando erro...')
+                setError({
+                  message: 'Teste: Email ou senha incorretos.',
+                  type: 'INVALID_CREDENTIALS',
+                  showCreateAccount: true
+                })
+                console.log('[DEBUG] Erro setado:', {
+                  message: 'Teste: Email ou senha incorretos.',
+                  type: 'INVALID_CREDENTIALS',
+                  showCreateAccount: true
+                })
+              }}
+              className="text-xs text-gray-500 hover:text-gray-400 transition-colors"
+            >
+              🧪 Testar erro de credenciais
+            </button>
+          </div>
         </div>
 
-        {/* Demo Info */}
-        <div className="mt-6 text-center">
-          <p className="text-gray-500 text-xs">
-            Demo: use qualquer email válido e senha com 6+ caracteres
-          </p>
-        </div>
+        {/* Aviso para Cadastro */}
+        {!isLogin && (
+          <div className="mt-6 p-4 bg-yellow-900/20 border border-yellow-500/30 rounded-lg">
+            <p className="text-yellow-400 text-xs">
+              ⚠️ Novo cadastro pode precisar de confirmação de email dependendo das configurações do Supabase.
+            </p>
+          </div>
+        )}
       </motion.div>
     </div>
   )

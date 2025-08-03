@@ -2,9 +2,11 @@
 
 import React from 'react'
 import { motion } from 'framer-motion'
-import SalesOverviewChart from '../../components/SalesOverviewChart'
-import CategoryDistributionChart from '../../components/CategoryDisribuitionChart'
-import StatCard from '../../components/StatCard' 
+import { 
+  SalesOverviewChart, 
+  CategoryDistributionChart 
+} from '../../components/features/analytics'
+import { StatCard } from '../../components/ui' 
 import { CreditCard, DollarSign, ShoppingCart, TrendingUp } from 'lucide-react'
 
 const Salespage = () => {

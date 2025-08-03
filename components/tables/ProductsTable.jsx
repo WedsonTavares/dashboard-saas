@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useMemo, useState, useEffect } from 'react'
-import { getProducts, updateProduct, deleteProduct } from '../lib/supabase-queries'
+import { getProducts } from '../../lib/supabase-queries'
 import { motion } from "framer-motion"
 import { Edit, Save, Search, Trash2, RefreshCw } from 'lucide-react'
 import Image from 'next/image'

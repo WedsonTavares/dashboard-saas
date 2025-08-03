@@ -1,7 +1,6 @@
 import React from 'react'
-import Header from '../../components/Header'
-import Sidebar from '../../components/Sidebar'
-import ClientsTable from '../../components/ClientsTable'
+import { Header, Sidebar } from '../../components/layout'
+import { ClientsTable } from '../../components/tables'
 
 const ClientsPage = () => {
     return (

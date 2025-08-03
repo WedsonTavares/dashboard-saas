@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react'
+import React, { createContext, useContext, useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 
 const AuthContext = createContext({})
@@ -16,117 +16,165 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [sessionTimeout, setSessionTimeout] = useState(null)
-  
-  // Cache de sessão para performance
-  const [sessionCache, setSessionCache] = useState(null)
-  const [lastSessionCheck, setLastSessionCheck] = useState(0)
+  const [initialized, setInitialized] = useState(false)
 
-  // Verificar sessão com cache
-  const checkSession = useCallback(async (forceRefresh = false) => {
-    const now = Date.now()
-    const cacheExpiry = 30000 // 30 segundos
+  // Verificar sessão inicial APENAS UMA VEZ
+  useEffect(() => {
+    let mounted = true
 
-    if (!forceRefresh && sessionCache && (now - lastSessionCheck) < cacheExpiry) {
-      return sessionCache
-    }
-
-    try {
-      const { data: { session }, error } = await supabase.auth.getSession()
+    const initializeAuth = async () => {
+      if (initialized) return
       
-      if (error) {
-        console.error('[AUTH] Session check error:', error.message)
-        setSessionCache(null)
-        setUser(null)
-        return null
-      }
-
-      setSessionCache(session)
-      setLastSessionCheck(now)
-      
-      if (session?.user) {
-        setUser(session.user)
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession()
         
-        // Configurar timeout de sessão
-        if (session.expires_at) {
-          const expiresAt = new Date(session.expires_at * 1000)
-          const timeUntilExpiry = expiresAt.getTime() - now
-          
-          if (timeUntilExpiry > 0) {
-            if (sessionTimeout) clearTimeout(sessionTimeout)
-            
-            const timeout = setTimeout(() => {
-              console.log('[AUTH] Session expired, logging out')
-              signOut()
-            }, timeUntilExpiry)
-            
-            setSessionTimeout(timeout)
+        if (mounted) {
+          if (error) {
+            console.error('[AUTH] Session error:', error.message)
+            setUser(null)
+          } else if (session?.user) {
+            setUser(session.user)
+            console.log(`[AUTH] User session restored: ${session.user.email}`)
+          } else {
+            setUser(null)
           }
+          
+          setLoading(false)
+          setInitialized(true)
         }
-      } else {
-        setUser(null)
+      } catch (error) {
+        console.error('[AUTH] Init error:', error)
+        if (mounted) {
+          setUser(null)
+          setLoading(false)
+          setInitialized(true)
+        }
       }
-
-      return session
-    } catch (error) {
-      console.error('[AUTH] Session check failed:', error)
-      setSessionCache(null)
-      setUser(null)
-      return null
     }
-  }, [sessionCache, lastSessionCheck, sessionTimeout])
+
+    initializeAuth()
+
+    return () => {
+      mounted = false
+    }
+  }, [initialized])
+
+  // Listener para mudanças de autenticação
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log(`[AUTH] Auth state changed: ${event}`)
+
+        if (event === 'SIGNED_IN' && session?.user) {
+          setUser(session.user)
+          setLoading(false)
+        } else if (event === 'SIGNED_OUT') {
+          setUser(null)
+          setLoading(false)
+        } else if (event === 'TOKEN_REFRESHED' && session) {
+          setUser(session.user)
+        }
+        // Removido INITIAL_SESSION para evitar conflitos
+      }
+    )
+
+    return () => subscription?.unsubscribe()
+  }, [])
 
   const signUp = async (email, password) => {
     setLoading(true)
     try {
-      // Validações de segurança
+      // Validações básicas
       if (!email || !password) {
-        return { error: { message: 'Email e senha são obrigatórios' } }
+        return { error: { message: 'Email e senha são obrigatórios', type: 'VALIDATION_ERROR' } }
       }
 
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
       if (!emailRegex.test(email)) {
-        return { error: { message: 'Formato de email inválido' } }
+        return { error: { message: 'Formato de email inválido', type: 'VALIDATION_ERROR' } }
       }
 
       if (password.length < 6) {
-        return { error: { message: 'Senha deve ter pelo menos 6 caracteres' } }
+        return { error: { message: 'Senha deve ter pelo menos 6 caracteres', type: 'VALIDATION_ERROR' } }
       }
 
-      // Verificar força da senha
-      const hasUpperCase = /[A-Z]/.test(password)
-      const hasLowerCase = /[a-z]/.test(password)
-      const hasNumbers = /\d/.test(password)
+      console.log('[AUTH] Creating new account for:', email)
+
+      const { data, error } = await supabase.auth.signUp({
+        email: email.toLowerCase().trim(),
+        password
+      })
       
-      if (!hasUpperCase || !hasLowerCase || !hasNumbers) {
+      if (error) {
+        console.error('[AUTH] Registration error:', error.message)
+        
+        // Tratamento profissional de erros específicos
+        if (error.message.includes('User already registered')) {
+          return { 
+            error: { 
+              message: 'Este email já está registrado. Tente fazer login ou use outro email.',
+              type: 'USER_EXISTS'
+            } 
+          }
+        }
+        
+        if (error.message.includes('Invalid email')) {
+          return { 
+            error: { 
+              message: 'Email inválido. Verifique o formato e tente novamente.',
+              type: 'INVALID_EMAIL'
+            } 
+          }
+        }
+        
+        if (error.message.includes('Password')) {
+          return { 
+            error: { 
+              message: 'Senha muito fraca. Use pelo menos 6 caracteres com letras e números.',
+              type: 'WEAK_PASSWORD'
+            } 
+          }
+        }
+        
+        if (error.message.includes('rate')) {
+          return { 
+            error: { 
+              message: 'Muitas tentativas de registro. Aguarde alguns minutos e tente novamente.',
+              type: 'RATE_LIMIT'
+            } 
+          }
+        }
+        
+        // Erro genérico mas informativo
         return { 
           error: { 
-            message: 'Senha deve conter: 1 maiúscula, 1 minúscula e 1 número' 
+            message: 'Erro ao criar conta. Tente novamente ou entre em contato com o suporte.',
+            type: 'REGISTRATION_ERROR',
+            details: error.message
           } 
         }
       }
 
-      const { data, error } = await supabase.auth.signUp({
-        email: email.toLowerCase().trim(),
-        password,
-        options: {
-          emailRedirectTo: undefined, // Sem confirmação de email
-          data: {
-            email_confirm: false // Desabilitar confirmação de email
-          }
-        }
-      })
-      
-      if (error) {
-        console.error('[AUTH] Sign up error:', error.message)
-        return { error }
+      if (data?.user) {
+        console.log('[AUTH] Account created successfully for:', email)
+        return { data, error: null }
       }
 
-      console.log(`[AUTH] New user registered: ${email}`)
-      return { data, error: null }
+      return { 
+        error: { 
+          message: 'Erro inesperado ao criar conta. Tente novamente.',
+          type: 'UNEXPECTED_ERROR'
+        } 
+      }
     } catch (error) {
-      console.error('[AUTH] Sign up failed:', error)
-      return { error: { message: 'Erro interno. Tente novamente.' } }
+      console.error('[AUTH] Registration failed:', error)
+      return { 
+        error: { 
+          message: 'Erro interno do sistema. Tente novamente em alguns minutos.',
+          type: 'SYSTEM_ERROR',
+          details: error.message
+        } 
+      }
     } finally {
       setLoading(false)
     }
@@ -135,7 +183,7 @@ export const AuthProvider = ({ children }) => {
   const signIn = async (email, password) => {
     setLoading(true)
     try {
-      // Validações de segurança
+      // Validações básicas
       if (!email || !password) {
         return { error: { message: 'Email e senha são obrigatórios' } }
       }
@@ -149,129 +197,132 @@ export const AuthProvider = ({ children }) => {
         return { error: { message: 'Senha deve ter pelo menos 6 caracteres' } }
       }
 
+      console.log('[AUTH] Attempting login for:', email)
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email.toLowerCase().trim(),
         password
       })
       
       if (error) {
-        console.error('[AUTH] Sign in error:', error.message)
-        console.warn(`[SECURITY] Failed login attempt for email: ${email}`)
-        return { error }
+        console.error('[AUTH] Login failed:', error.message)
+        setLoading(false)
+        
+        // Tratamento profissional de erros específicos
+        if (error.message.includes('Invalid login credentials')) {
+          return { 
+            error: { 
+              message: 'Email ou senha incorretos.',
+              type: 'INVALID_CREDENTIALS',
+              suggestion: 'account_not_found'
+            } 
+          }
+        }
+        
+        if (error.message.includes('Email not confirmed')) {
+          return { 
+            error: { 
+              message: 'Conta não confirmada. Entre em contato com o suporte.',
+              type: 'EMAIL_NOT_CONFIRMED'
+            } 
+          }
+        }
+        
+        if (error.message.includes('Too many requests')) {
+          return { 
+            error: { 
+              message: 'Muitas tentativas de login. Tente novamente em alguns minutos.',
+              type: 'RATE_LIMIT'
+            } 
+          }
+        }
+        
+        if (error.message.includes('Network')) {
+          return { 
+            error: { 
+              message: 'Problema de conexão. Verifique sua internet e tente novamente.',
+              type: 'NETWORK_ERROR'
+            } 
+          }
+        }
+        
+        // Erro genérico mas informativo
+        return { 
+          error: { 
+            message: 'Erro ao fazer login. Tente novamente ou entre em contato com o suporte.',
+            type: 'UNKNOWN_ERROR',
+            details: error.message
+          } 
+        }
       }
 
       if (data?.user) {
         setUser(data.user)
-        setSessionCache(data.session)
-        setLastSessionCheck(Date.now())
-        console.log(`[AUTH] Successful login for user: ${data.user.email}`)
+        console.log('[AUTH] Login successful for:', data.user.email)
+        setLoading(false)
+        return { data, error: null }
       }
 
-      return { data, error: null }
-    } catch (error) {
-      console.error('[AUTH] Sign in failed:', error)
-      return { error: { message: 'Erro interno. Tente novamente.' } }
-    } finally {
       setLoading(false)
+      return { 
+        error: { 
+          message: 'Login falhou. Tente novamente.',
+          type: 'LOGIN_FAILED'
+        } 
+      }
+    } catch (error) {
+      console.error('[AUTH] Login error:', error)
+      setLoading(false)
+      return { 
+        error: { 
+          message: 'Erro interno do sistema. Tente novamente em alguns minutos.',
+          type: 'SYSTEM_ERROR',
+          details: error.message
+        } 
+      }
     }
   }
 
   const signOut = async () => {
     setLoading(true)
     try {
-      // Limpar timeout de sessão
-      if (sessionTimeout) {
-        clearTimeout(sessionTimeout)
-        setSessionTimeout(null)
+      console.log('[AUTH] Starting sign out process...')
+      
+      // Primeiro limpar o estado local
+      setUser(null)
+      
+      // Limpar dados locais
+      if (typeof window !== 'undefined') {
+        localStorage.clear()
+        sessionStorage.clear()
       }
-
-      // Limpar cache
-      setSessionCache(null)
-      setLastSessionCheck(0)
-
+      
+      // Depois fazer logout no Supabase
       const { error } = await supabase.auth.signOut()
       
       if (error) {
         console.error('[AUTH] Sign out error:', error.message)
-      }
-
-      setUser(null)
-      console.log('[AUTH] User signed out successfully')
-      
-      // Limpar dados sensíveis
-      if (typeof window !== 'undefined') {
-        localStorage.clear()
-        sessionStorage.clear()
+      } else {
+        console.log('[AUTH] User signed out successfully')
       }
 
       return { error: null }
     } catch (error) {
       console.error('[AUTH] Sign out failed:', error)
+      setUser(null) // Limpar usuário mesmo se houver erro
       return { error }
     } finally {
       setLoading(false)
     }
   }
 
-  useEffect(() => {
-    let mounted = true
-
-    // Verificar sessão inicial
-    checkSession(true).finally(() => {
-      if (mounted) {
-        setLoading(false)
-      }
-    })
-
-    // Listener para mudanças de autenticação
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (!mounted) return
-
-        console.log(`[AUTH] Auth state changed: ${event}`)
-
-        if (event === 'SIGNED_IN' && session?.user) {
-          setUser(session.user)
-          setSessionCache(session)
-          setLastSessionCheck(Date.now())
-        } else if (event === 'SIGNED_OUT') {
-          setUser(null)
-          setSessionCache(null)
-          setLastSessionCheck(0)
-        } else if (event === 'TOKEN_REFRESHED' && session) {
-          setSessionCache(session)
-          setLastSessionCheck(Date.now())
-        }
-      }
-    )
-
-    return () => {
-      mounted = false
-      subscription?.unsubscribe()
-      if (sessionTimeout) {
-        clearTimeout(sessionTimeout)
-      }
-    }
-  }, [checkSession, sessionTimeout])
-
-  // Verificação periódica (a cada 5 minutos)
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (user) {
-        checkSession(true)
-      }
-    }, 5 * 60 * 1000)
-
-    return () => clearInterval(interval)
-  }, [user, checkSession])
-
   const value = {
     user,
     loading,
+    initialized,
     signUp,
     signIn,
-    signOut,
-    checkSession
+    signOut
   }
 
   return (

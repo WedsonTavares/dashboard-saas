@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { motion } from "framer-motion";
-import { getOrders, updateOrder, deleteOrder } from '../lib/supabase-queries'
+import { getOrders } from '../../lib/supabase-queries'
 import { Edit, Search, Trash2, RefreshCw, Save } from 'lucide-react';
 
 const OrdersTable = () => {

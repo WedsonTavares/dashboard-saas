@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from 'react'
 import { motion } from "framer-motion"
-import { getDashboardData } from '../lib/supabase-queries'
-import Statcard from './StatCard'
+import { getDashboardData } from '../../lib/supabase-queries'
+import { StatCard } from '../ui'
 import { DollarSign, ShoppingBag, Users, SquareActivity } from 'lucide-react'
 
 const DynamicDashboard = () => {
@@ -70,22 +70,22 @@ const DynamicDashboard = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1 }}
         >
-            <Statcard 
+            <StatCard 
                 name="Receita Total" 
                 icon={DollarSign} 
                 value={formatCurrency(dashboardData.totalSales)} 
             />
-            <Statcard 
+            <StatCard 
                 name="Total Clientes" 
                 icon={Users} 
                 value={formatNumber(dashboardData.totalClients)} 
             />
-            <Statcard 
+            <StatCard 
                 name="Total Produtos" 
                 icon={ShoppingBag} 
                 value={formatNumber(dashboardData.totalProducts)} 
             />
-            <Statcard 
+            <StatCard 
                 name="Total Pedidos" 
                 icon={SquareActivity} 
                 value={formatNumber(dashboardData.totalOrders)} 

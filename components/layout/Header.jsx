@@ -2,18 +2,36 @@
 
 import Image from 'next/image'
 import React, { useState } from 'react'
-import uk from '../public/images/uk.png'
+import { useRouter } from 'next/navigation'
+import ukFlag from '../../public/images/uk.png'
 import { Bell, ChevronDown, LogOut, User } from 'lucide-react'
-import admin from '../public/images/admin.jpg'
-import { useAuth } from '../contexts/AuthContext'
+import admin from '../../public/images/admin.jpg'
+import { useAuth } from '../../contexts/AuthContext'
 
 const Header = () => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false)
-    const { user, signOut } = useAuth()
+    const [isLoggingOut, setIsLoggingOut] = useState(false)
+    const { user, signOut, loading } = useAuth()
+    const router = useRouter()
 
     const handleSignOut = async () => {
-        await signOut()
-        setIsDropdownOpen(false)
+        try {
+            setIsLoggingOut(true)
+            setIsDropdownOpen(false)
+            console.log('[HEADER] Iniciando logout...')
+            
+            await signOut()
+            
+            console.log('[HEADER] Logout realizado, redirecionando...')
+            router.replace('/auth')
+            
+        } catch (error) {
+            console.error('[HEADER] Erro no logout:', error)
+            // Mesmo com erro, tentar redirecionar
+            router.replace('/auth')
+        } finally {
+            setIsLoggingOut(false)
+        }
     }
 
     return (
@@ -24,7 +42,7 @@ const Header = () => {
                 </h1>
                 <div className='flex items-center space-x-3 sm:space-x-6'>
                     <Image
-                        src={uk}
+                        src={ukFlag}
                         alt="country flag"
                         width={25}
                         height={18}
@@ -72,10 +90,20 @@ const Header = () => {
                                 
                                 <button 
                                     onClick={handleSignOut}
-                                    className='w-full px-4 py-2 text-left text-gray-300 hover:bg-[#404040] hover:text-white transition-colors flex items-center space-x-2'
+                                    disabled={isLoggingOut}
+                                    className='w-full px-4 py-2 text-left text-gray-300 hover:bg-[#404040] hover:text-white transition-colors flex items-center space-x-2 disabled:opacity-50'
                                 >
-                                    <LogOut className='w-4 h-4' />
-                                    <span>Sair</span>
+                                    {isLoggingOut ? (
+                                        <>
+                                            <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+                                            <span>Saindo...</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <LogOut className='w-4 h-4' />
+                                            <span>Sair</span>
+                                        </>
+                                    )}
                                 </button>
                             </div>
                         )}

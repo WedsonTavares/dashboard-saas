@@ -1,10 +1,10 @@
 "use client";
 
-import Statcard from '../../components/StatCard';
+import { StatCard } from '../../components/ui';
 import React from 'react'
 import { motion } from "framer-motion";
 import { RotateCcw, UserCheck, UserPlus, Users, UsersIcon } from 'lucide-react';
-import UsersTable from '../../components/UsersTable';
+import { UsersTable } from '../../components/features/user-management';
 
 const UsersPage = () => {
     return (
@@ -15,22 +15,22 @@ const UsersPage = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 1 }}
                     className=" grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8">
-                    <Statcard
+                    <StatCard
                         name="Total de Clientes"
                         icon={UsersIcon}
                         value="1,437"
                     />
-                    <Statcard
+                    <StatCard
                         name="Novos Clientes"
                         icon={UserPlus}
                         value="860"
                     />
-                    <Statcard
+                    <StatCard
                         name="Clientes Ativos"
                         icon={UserCheck}
                         value="4080"
                     />
-                    <Statcard
+                    <StatCard
                         name="Total de Clientes"
                         icon={RotateCcw}
                         value="2730"
