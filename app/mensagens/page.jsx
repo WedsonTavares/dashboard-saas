@@ -126,7 +126,9 @@ const MensagensPage = () => {
   }
 
   const markAsRead = (id) => {
-    console.log(`Marking message ${id} as read`)
+    setMessages(messages.map(msg => 
+      msg.id === id ? { ...msg, isRead: true } : msg
+    ))
   }
 
   const unreadCount = messages.filter(m => !m.isRead).length

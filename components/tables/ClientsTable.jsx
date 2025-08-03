@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { motion } from "framer-motion";
-import { getClients } from '../../lib/supabase-queries'
+import { getClients, updateClient, deleteClient } from '../../lib/supabase-queries'
 import { Edit, Search, Trash2, RefreshCw, Save } from 'lucide-react';
 import Image from 'next/image';
 
@@ -62,7 +62,6 @@ const ClientsTable = () => {
             })
             
             if (updatedClient) {
-                console.log('Cliente atualizado com sucesso!')
                 setEditingRow(null)
             }
         } catch (error) {
@@ -91,7 +90,6 @@ const ClientsTable = () => {
                 const deletedClient = await deleteClient(id)
                 if (deletedClient) {
                     setClients(prevClients => prevClients.filter(client => client.id !== id))
-                    console.log('Cliente excluído com sucesso!')
                 }
             } catch (error) {
                 console.error('Erro ao excluir cliente:', error)

@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useMemo, useState, useEffect } from 'react'
-import { getProducts } from '../../lib/supabase-queries'
+import { getProducts, updateProduct, deleteProduct } from '../../lib/supabase-queries'
 import { motion } from "framer-motion"
 import { Edit, Save, Search, Trash2, RefreshCw } from 'lucide-react'
 import Image from 'next/image'
@@ -53,7 +53,6 @@ const ProductsTable = () => {
             })
             
             if (updatedProduct) {
-                console.log('Produto atualizado com sucesso!')
                 setEditingRow(null)
             }
         } catch (error) {
@@ -65,7 +64,7 @@ const ProductsTable = () => {
     }
 
     const handleChange = (id, field, value) => {
-        if (!/^d*\.?\d*$/.test(value)) return; //allow only numbers and decimal
+        if (!/^\d*\.?\d*$/.test(value)) return; //allow only numbers and decimal
 
         setProducts(prevProducts =>
             prevProducts.map(product =>
@@ -84,7 +83,6 @@ const ProductsTable = () => {
                 if (deletedProduct) {
                     // Remove do estado local
                     setProducts(prevProducts => prevProducts.filter(product => product.id !== id))
-                    console.log('Produto excluído com sucesso!')
                 }
             } catch (error) {
                 console.error('Erro ao excluir produto:', error)

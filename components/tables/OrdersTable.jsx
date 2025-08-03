@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { motion } from "framer-motion";
-import { getOrders } from '../../lib/supabase-queries'
+import { getOrders, updateOrder, deleteOrder } from '../../lib/supabase-queries'
 import { Edit, Search, Trash2, RefreshCw, Save } from 'lucide-react';
 
 const OrdersTable = () => {
@@ -59,7 +59,6 @@ const OrdersTable = () => {
             })
             
             if (updatedOrder) {
-                console.log('Pedido atualizado com sucesso!')
                 setEditingRow(null)
             }
         } catch (error) {
@@ -88,7 +87,6 @@ const OrdersTable = () => {
                 const deletedOrder = await deleteOrder(id)
                 if (deletedOrder) {
                     setOrders(prevOrders => prevOrders.filter(order => order.id !== id))
-                    console.log('Pedido excluído com sucesso!')
                 }
             } catch (error) {
                 console.error('Erro ao excluir pedido:', error)

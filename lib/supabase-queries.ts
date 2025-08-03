@@ -98,3 +98,108 @@ export async function getDashboardData() {
     }
   }
 }
+
+// CRUD Operations para Produtos
+export async function updateProduct(id, updates) {
+  try {
+    const { data, error } = await supabase
+      .from('products')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  } catch (error) {
+    console.error('Erro ao atualizar produto:', error)
+    return null
+  }
+}
+
+export async function deleteProduct(id) {
+  try {
+    const { data, error } = await supabase
+      .from('products')
+      .delete()
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  } catch (error) {
+    console.error('Erro ao deletar produto:', error)
+    return null
+  }
+}
+
+// CRUD Operations para Pedidos
+export async function updateOrder(id, updates) {
+  try {
+    const { data, error } = await supabase
+      .from('orders')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  } catch (error) {
+    console.error('Erro ao atualizar pedido:', error)
+    return null
+  }
+}
+
+export async function deleteOrder(id) {
+  try {
+    const { data, error } = await supabase
+      .from('orders')
+      .delete()
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  } catch (error) {
+    console.error('Erro ao deletar pedido:', error)
+    return null
+  }
+}
+
+// CRUD Operations para Clientes
+export async function updateClient(id, updates) {
+  try {
+    const { data, error } = await supabase
+      .from('clients')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  } catch (error) {
+    console.error('Erro ao atualizar cliente:', error)
+    return null
+  }
+}
+
+export async function deleteClient(id) {
+  try {
+    const { data, error } = await supabase
+      .from('clients')
+      .delete()
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  } catch (error) {
+    console.error('Erro ao deletar cliente:', error)
+    return null
+  }
+}
