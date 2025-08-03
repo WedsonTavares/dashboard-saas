@@ -2,37 +2,13 @@
 
 import Image from 'next/image'
 import React, { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import ukFlag from '../../public/images/uk.png'
-import { Bell, ChevronDown, LogOut, User } from 'lucide-react'
+import { Bell, ChevronDown, User } from 'lucide-react'
 import admin from '../../public/images/admin.jpg'
-import { useAuth } from '../../contexts/AuthContext'
+import SignOutButton from '../auth/SignOutButton'
 
 const Header = () => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false)
-    const [isLoggingOut, setIsLoggingOut] = useState(false)
-    const { user, signOut, loading } = useAuth()
-    const router = useRouter()
-
-    const handleSignOut = async () => {
-        try {
-            setIsLoggingOut(true)
-            setIsDropdownOpen(false)
-            console.log('[HEADER] Iniciando logout...')
-            
-            await signOut()
-            
-            console.log('[HEADER] Logout realizado, redirecionando...')
-            router.replace('/auth')
-            
-        } catch (error) {
-            console.error('[HEADER] Erro no logout:', error)
-            // Mesmo com erro, tentar redirecionar
-            router.replace('/auth')
-        } finally {
-            setIsLoggingOut(false)
-        }
-    }
 
     return (
         <header className='bg-[#1e1e1e] shadow-lg border-b border-[#1f1f1f] mx-4 sm:mx-6 lg:mx-8 mt-4 mb-2 rounded-lg'>
@@ -67,7 +43,7 @@ const Header = () => {
                             />
                             <div className='hidden sm:block'>
                                 <span className='text-gray-100 font-medium'>
-                                    {user?.email?.split('@')[0] || 'Usuário'}
+                                    Admin
                                 </span>
                             </div>
                             <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
@@ -77,9 +53,9 @@ const Header = () => {
                         {isDropdownOpen && (
                             <div className='absolute right-0 mt-2 w-48 bg-[#2f2f2f] rounded-lg shadow-lg border border-[#404040] py-2 z-50'>
                                 <div className='px-4 py-2 border-b border-[#404040]'>
-                                    <p className='text-sm text-gray-400'>Logado como:</p>
+                                    <p className='text-sm text-gray-400'>Usuário:</p>
                                     <p className='text-sm text-white font-medium truncate'>
-                                        {user?.email}
+                                        admin@dashboard.com
                                     </p>
                                 </div>
                                 
@@ -87,24 +63,8 @@ const Header = () => {
                                     <User className='w-4 h-4' />
                                     <span>Perfil</span>
                                 </button>
-                                
-                                <button 
-                                    onClick={handleSignOut}
-                                    disabled={isLoggingOut}
-                                    className='w-full px-4 py-2 text-left text-gray-300 hover:bg-[#404040] hover:text-white transition-colors flex items-center space-x-2 disabled:opacity-50'
-                                >
-                                    {isLoggingOut ? (
-                                        <>
-                                            <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
-                                            <span>Saindo...</span>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <LogOut className='w-4 h-4' />
-                                            <span>Sair</span>
-                                        </>
-                                    )}
-                                </button>
+
+                                <SignOutButton />
                             </div>
                         )}
                     </div>

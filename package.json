@@ -7,14 +7,12 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "import-data": "node scripts/import-data.js"
+    "lint": "next lint"
   },
   "dependencies": {
     "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.53.0",
-    "dotenv": "^17.2.1",
-    "framer-motion": "^12.18.1",
+    "framer-motion": "^12.23.12",
     "lucide-react": "^0.514.0",
     "next": "15.3.3",
     "react": "^19.0.0",

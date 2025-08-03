@@ -17,7 +17,6 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React, { useState } from "react";
-import { useAuth } from '../../contexts/AuthContext';
 
 const ICONS = {
   House,
@@ -48,12 +47,6 @@ const SIDEBAR_ITEMS = [
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(true);
   const pathname = usePathname();
-  const { user, loading } = useAuth();
-
-  // Não renderizar sidebar se não estiver logado ou ainda carregando
-  if (loading || !user) {
-    return null;
-  }
 
   return (
     <aside className={`relative z-10 transition-all duration-300 ease-in-out flex-shrink-0 ${

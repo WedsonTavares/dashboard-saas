@@ -7,4 +7,3 @@ export { default as Card } from './atoms/Card'
 
 // Molecules - Combinações de átomos
 export { default as StatCard } from './molecules/StatCard'
-export { default as LoginForm } from './molecules/LoginForm'
