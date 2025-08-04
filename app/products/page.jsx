@@ -5,9 +5,31 @@ import { motion } from "framer-motion"
 import { ChartBarDecreasing, DollarSign, ShoppingBag, SquareActivity } from 'lucide-react'
 import { StatCard } from '../../components/ui'
 import { ProductsTable } from '../../components/tables'
-
+import { useAsyncData } from '../../components/hooks/useAsyncData'
+import { getProducts, getDashboardData } from '../../lib/supabase-queries'
+import Loading from '../../components/ui/Loading'
 
 const Productspage = () => {
+    const { data: dashboardData } = useAsyncData(
+        getDashboardData,
+        [],
+        { 
+            loadingText: 'Carregando estatísticas...', 
+            useGlobalLoading: true,
+            showLocalLoadingOnStart: false
+        }
+    )
+
+    const { data: products } = useAsyncData(
+        getProducts,
+        [],
+        { 
+            loadingText: 'Carregando produtos...', 
+            useGlobalLoading: true,
+            showLocalLoadingOnStart: false
+        }
+    )
+
     return (
         <div className='flex-1 overflow-auto relative z-10'>
             <main className='max-w-7xl mx-auto px-4 lg:px-8  py-6 '>
@@ -16,13 +38,13 @@ const Productspage = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 1 }}
                 >
-                    <StatCard name="Total Produtos" icon={ShoppingBag} value={"4,352"} />
-                    <StatCard name="Total Pedidos" icon={SquareActivity} value={"1,234"} />
-                    <StatCard name="Total Clientes" icon={DollarSign} value={"567"} />
-                    <StatCard name="Total Receita" icon={ChartBarDecreasing} value={"$12,345"} />
+                    <StatCard name="Total Produtos" icon={ShoppingBag} value={dashboardData?.totalProducts || "4,352"} />
+                    <StatCard name="Total Pedidos" icon={SquareActivity} value={dashboardData?.totalOrders || "1,234"} />
+                    <StatCard name="Total Clientes" icon={DollarSign} value={dashboardData?.totalClients || "567"} />
+                    <StatCard name="Total Receita" icon={ChartBarDecreasing} value={`$${dashboardData?.totalSales || "12,345"}`} />
                 </motion.div>
 
-                <ProductsTable />
+                <ProductsTable products={products} />
             </main>
         </div>
     )

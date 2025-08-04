@@ -3,16 +3,27 @@ import { useRouter } from 'next/navigation'
 import { createBrowserSupabase } from '../../utils/supabase/client'
 import { LogOut } from 'lucide-react'
 import { useState } from 'react'
+import { useLoading } from '../providers/LoadingProvider'
+import { ButtonLoading } from '../ui/Loading'
 
 export default function SignOutButton() {
   const supabase = createBrowserSupabase()
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const { withDbLoading } = useLoading()
 
   const handleSignOut = async () => {
     setLoading(true)
-    await supabase.auth.signOut()
-    router.replace('/login')
+    
+    await withDbLoading(
+      async () => {
+        await supabase.auth.signOut()
+        // Não fazer router.replace aqui, deixar o AuthGuard gerenciar
+        // O AuthGuard detectará SIGNED_OUT e redirecionará
+      },
+      'Fazendo logout...'
+    )
+    
     setLoading(false)
   }
 
@@ -24,7 +35,7 @@ export default function SignOutButton() {
     >
       {loading ? (
         <>
-          <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+          <ButtonLoading size="sm" />
           <span>Saindo...</span>
         </>
       ) : (

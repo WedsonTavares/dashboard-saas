@@ -2,10 +2,13 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createBrowserSupabase } from '../../utils/supabase/client'
+import { useLoading } from '../../components/providers/LoadingProvider'
+import { ButtonLoading } from '../../components/ui/Loading'
 
 export default function LoginPage() {
   const supabase = createBrowserSupabase()
   const router = useRouter()
+  const { withDbLoading } = useLoading()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -18,13 +21,20 @@ export default function LoginPage() {
     setErrorMsg('')
     setLoading(true)
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    await withDbLoading(
+      async () => {
+        const { error } = await supabase.auth.signInWithPassword({ email, password })
 
-    if (error) {
-      setErrorMsg('E-mail ou senha inválidos')
-    } else {
-      router.replace('/dashboard')
-    }
+        if (error) {
+          setErrorMsg('E-mail ou senha inválidos')
+        } else {
+          // Não fazer router.replace aqui, deixar o AuthGuard gerenciar
+          // O AuthGuard detectará a mudança de auth state e redirecionará
+        }
+      },
+      'Fazendo login...'
+    )
+    
     setLoading(false)
   }
 
@@ -175,10 +185,7 @@ export default function LoginPage() {
             >
               {loading ? (
                 <div className="flex items-center justify-center space-x-2">
-                  <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
+                  <ButtonLoading size="sm" />
                   <span>Entrando...</span>
                 </div>
               ) : (

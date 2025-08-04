@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation'
 import { Header, Sidebar } from './layout'
+import PageTransition from './layout/PageTransition'
 
 export function ConditionalLayout({ children }) {
   const pathname = usePathname()
@@ -21,14 +22,16 @@ export function ConditionalLayout({ children }) {
   
   // Layout padrão do dashboard (com sidebar e header)
   return (
-    <div className="flex h-screen overflow-hidden">
-      <Sidebar />
-      <div className="flex flex-col flex-1 overflow-auto">
-        <Header />
-        <main className="flex-1 overflow-auto p-6">
-          {children}
-        </main>
+    <PageTransition>
+      <div className="flex h-screen overflow-hidden">
+        <Sidebar />
+        <div className="flex flex-col flex-1 overflow-auto">
+          <Header />
+          <main className="flex-1 overflow-auto p-6">
+            {children}
+          </main>
+        </div>
       </div>
-    </div>
+    </PageTransition>
   )
 }

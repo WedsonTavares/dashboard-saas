@@ -1,14 +1,27 @@
 'use client'
 
 import Image from 'next/image'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import ukFlag from '../../public/images/uk.png'
 import { Bell, ChevronDown, User } from 'lucide-react'
 import admin from '../../public/images/admin.jpg'
 import SignOutButton from '../auth/SignOutButton'
+import { createBrowserSupabase } from '../../utils/supabase/client'
 
 const Header = () => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+    const [userEmail, setUserEmail] = useState('')
+    const supabase = createBrowserSupabase()
+
+    useEffect(() => {
+        const getUser = async () => {
+            const { data: { user } } = await supabase.auth.getUser()
+            if (user?.email) {
+                setUserEmail(user.email)
+            }
+        }
+        getUser()
+    }, [])
 
     return (
         <header className='bg-[#1e1e1e] shadow-lg border-b border-[#1f1f1f] mx-4 sm:mx-6 lg:mx-8 mt-4 mb-2 rounded-lg'>
@@ -51,11 +64,10 @@ const Header = () => {
 
                         {/* Dropdown Menu */}
                         {isDropdownOpen && (
-                            <div className='absolute right-0 mt-2 w-48 bg-[#2f2f2f] rounded-lg shadow-lg border border-[#404040] py-2 z-50'>
+                            <div className='absolute right-0 mt-2 w-64 bg-[#2f2f2f] rounded-lg shadow-lg border border-[#404040] py-2 z-50'>
                                 <div className='px-4 py-2 border-b border-[#404040]'>
-                                    <p className='text-sm text-gray-400'>Usuário:</p>
                                     <p className='text-sm text-white font-medium truncate'>
-                                        admin@dashboard.com
+                                        {userEmail || 'Carregando...'}
                                     </p>
                                 </div>
                                 

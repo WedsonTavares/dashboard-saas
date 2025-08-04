@@ -2,9 +2,15 @@ import { createBrowserSupabase } from '../utils/supabase/client'
 
 const supabase = createBrowserSupabase()
 
+// Delay simulado para demonstrar loading (remover em produção)
+const simulateDelay = (ms = 1000) => new Promise(resolve => setTimeout(resolve, ms))
+
 // Produtos (usando dados reais do Supabase)
 export async function getProducts() {
   try {
+    // Simular delay de rede
+    await simulateDelay(800)
+    
     const { data, error } = await supabase
       .from('products')
       .select('*')
@@ -26,6 +32,9 @@ export async function getProducts() {
 // Pedidos (usando dados reais do Supabase)
 export async function getOrders() {
   try {
+    // Simular delay de rede
+    await simulateDelay(600)
+    
     const { data, error } = await supabase
       .from('orders')
       .select('*')
@@ -47,6 +56,9 @@ export async function getOrders() {
 // Clientes (fallback para dados estáticos já que não temos tabela users)
 export async function getClients() {
   try {
+    // Simular delay de rede
+    await simulateDelay(500)
+    
     // Tentar buscar de uma possível tabela users primeiro
     const { data, error } = await supabase
       .from('users')
@@ -70,6 +82,9 @@ export async function getClients() {
 // Dashboard data (usando dados reais onde possível)
 export async function getDashboardData() {
   try {
+    // Simular delay de rede
+    await simulateDelay(1200)
+    
     // Buscar dados reais de products e orders
     const [productsResult, ordersResult] = await Promise.all([
       supabase.from('products').select('id', { count: 'exact' }),
@@ -100,8 +115,11 @@ export async function getDashboardData() {
 }
 
 // CRUD Operations para Produtos
-export async function updateProduct(id, updates) {
+export async function updateProduct(id: string, updates: any) {
   try {
+    // Simular delay de operação
+    await simulateDelay(600)
+    
     const { data, error } = await supabase
       .from('products')
       .update(updates)
@@ -117,8 +135,11 @@ export async function updateProduct(id, updates) {
   }
 }
 
-export async function deleteProduct(id) {
+export async function deleteProduct(id: string) {
   try {
+    // Simular delay de operação
+    await simulateDelay(500)
+    
     const { data, error } = await supabase
       .from('products')
       .delete()
@@ -135,8 +156,11 @@ export async function deleteProduct(id) {
 }
 
 // CRUD Operations para Pedidos
-export async function updateOrder(id, updates) {
+export async function updateOrder(id: string, updates: any) {
   try {
+    // Simular delay de operação
+    await simulateDelay(600)
+    
     const { data, error } = await supabase
       .from('orders')
       .update(updates)
@@ -152,8 +176,11 @@ export async function updateOrder(id, updates) {
   }
 }
 
-export async function deleteOrder(id) {
+export async function deleteOrder(id: string) {
   try {
+    // Simular delay de operação
+    await simulateDelay(500)
+    
     const { data, error } = await supabase
       .from('orders')
       .delete()
@@ -170,8 +197,11 @@ export async function deleteOrder(id) {
 }
 
 // CRUD Operations para Clientes
-export async function updateClient(id, updates) {
+export async function updateClient(id: string, updates: any) {
   try {
+    // Simular delay de operação
+    await simulateDelay(600)
+    
     const { data, error } = await supabase
       .from('clients')
       .update(updates)
@@ -187,8 +217,11 @@ export async function updateClient(id, updates) {
   }
 }
 
-export async function deleteClient(id) {
+export async function deleteClient(id: string) {
   try {
+    // Simular delay de operação
+    await simulateDelay(500)
+    
     const { data, error } = await supabase
       .from('clients')
       .delete()

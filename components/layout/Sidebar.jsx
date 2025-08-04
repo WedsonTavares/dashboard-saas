@@ -33,8 +33,7 @@ const ICONS = {
 };
 
 const SIDEBAR_ITEMS = [
-  { name: "Dashboard", icon: "house", href: "/" },
-  { name: "Overview", icon: "dollarSign", href: "/overview" },
+  { name: "Dashboard", icon: "house", href: "/dashboard" },
   { name: "Produtos", icon: "shoppingBag", href: "/products" },
   { name: "Pedidos", icon: "shoppingCart", href: "/orders" },
   { name: "Clientes", icon: "users", href: "/users" },

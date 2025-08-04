@@ -47,7 +47,16 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Executa para todas as rotas exceto _next, assets, login etc
-    '/((?!_next/static|_next/image|favicon.ico|login|auth).*)',
+    // Executa apenas para rotas específicas para evitar conflitos
+    '/dashboard/:path*',
+    '/products/:path*',
+    '/orders/:path*',
+    '/clients/:path*',
+    '/users/:path*',
+    '/sales/:path*',
+    '/configuracoes/:path*',
+    '/help/:path*',
+    '/mensagens/:path*',
+    '/notificacoes/:path*'
   ],
 }
