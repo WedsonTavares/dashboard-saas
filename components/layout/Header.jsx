@@ -1,7 +1,8 @@
-'use client'
+"use client"
 
 import Image from 'next/image'
 import React, { useState, useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 import ukFlag from '../../public/images/uk.png'
 import { Bell, ChevronDown, User } from 'lucide-react'
 import admin from '../../public/images/admin.jpg'
@@ -12,6 +13,7 @@ const Header = () => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false)
     const [userEmail, setUserEmail] = useState('')
     const supabase = createBrowserSupabase()
+    const pathname = usePathname()
 
     useEffect(() => {
         const getUser = async () => {
@@ -23,11 +25,29 @@ const Header = () => {
         getUser()
     }, [])
 
+    // Mapar pathname para título amigável
+    const TITLE_MAP = {
+        '/dashboard': 'Visão Geral',
+        '/products': 'Produtos',
+        '/orders': 'Pedidos',
+        '/users': 'Clientes',
+        '/configuracoes': 'Configurações',
+        '/mensagens': 'Mensagens',
+        '/notificacoes': 'Notificações',
+        '/help': 'Ajuda',
+        '/': 'Visão Geral'
+    }
+
+    const currentTitle = TITLE_MAP[pathname?.split('?')[0] || '/'] ||
+        // fallback: usar o último segmento capitalizado
+        (pathname ? pathname.split('/').filter(Boolean).pop().replace(/-/g, ' ') : 'Dashboard')
+            .replace(/(^|\s)\S/g, (t) => t.toUpperCase())
+
     return (
         <header className='bg-[#1e1e1e] shadow-lg border-b border-[#1f1f1f] mx-4 sm:mx-6 lg:mx-8 mt-4 mb-2 rounded-lg'>
             <div className='max-w-7xl mx-auto py-4 px-4 sm:px-6 flex items-center justify-between'>
                 <h1 className='text-lg sm:text-xl lg:text-2xl font-semibold text-gray-100'>
-                    Dashboard
+                    {currentTitle}
                 </h1>
                 <div className='flex items-center space-x-3 sm:space-x-6'>
                     <Image

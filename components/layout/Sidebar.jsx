@@ -33,7 +33,7 @@ const ICONS = {
 };
 
 const SIDEBAR_ITEMS = [
-  { name: "Dashboard", icon: "house", href: "/dashboard" },
+  { name: "Visão Geral", icon: "house", href: "/dashboard" },
   { name: "Produtos", icon: "shoppingBag", href: "/products" },
   { name: "Pedidos", icon: "shoppingCart", href: "/orders" },
   { name: "Clientes", icon: "users", href: "/users" },
@@ -69,7 +69,7 @@ export default function Sidebar() {
               <Link key={item.name} href={item.href}>
                 <div
                   className={`flex items-center p-4 text-sm font-medium rounded-lg hover:bg-[#2f2f2f] mb-2 transition-colors ${
-                    pathname === item.href ? "bg-[#2f2f2f]" : ""
+                    pathname?.startsWith(item.href) ? "bg-[#2f2f2f]" : ""
                   }`}
                 >
                   <Icon size={20} style={{ minWidth: "20px" }} />
