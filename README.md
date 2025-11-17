@@ -161,10 +161,10 @@ Criei a pasta `docs/screenshots/`. Exporte suas imagens para lá e atualize os p
 ### Clientes
 ![Clientes](./docs/screenshots/clients.png)
 
-### Sidebar Aberta
+### Sidebar 
 ![Sidebar Aberta](./docs/screenshots/sidebar-open.png)
 
-### Sidebar Fechada
+### Sidebar 
 ![Sidebar Fechada](./docs/screenshots/sidebar-closed.png)
 
 ## Decisões de projeto e boas práticas
