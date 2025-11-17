@@ -1,6 +1,6 @@
 
 
-## AdminHub — Dashboard SaaS
+## AdminHub — Dashboard de Controle Interno
 
 Projeto de dashboard administrativo construído com Next.js (App Router), Supabase e Tailwind, com autenticação e proteção de rotas, carregamento global e gráficos reativos.
 
